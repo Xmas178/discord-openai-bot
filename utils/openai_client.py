@@ -4,14 +4,14 @@ Provides safe interface to OpenAI GPT models with error handling
 Author: Sami (CodeNob Dev)
 """
 
-from openai import OpenAI
+import openai
 from typing import List, Dict, Optional, Tuple
 import time
 
 
 class OpenAIClient:
     """
-    Safe wrapper for OpenAI API calls in Discord bot
+    Safe wrapper for OpenAI API calls in Discord bot (v0.28.1 API)
 
     Features:
     - Automatic error handling
@@ -50,12 +50,12 @@ class OpenAIClient:
         if not api_key or not api_key.startswith("sk-"):
             raise ValueError("Invalid OpenAI API key format")
 
+        # Set API key globally for openai library (v0.28.1 style)
+        openai.api_key = api_key
+
         self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
-
-        # Initialize OpenAI client (v1+ API)
-        self.client = OpenAI(api_key=api_key)
 
         # Retry configuration
         self.max_retries = 3
@@ -87,16 +87,16 @@ class OpenAIClient:
         # Attempt API call with retries
         for attempt in range(self.max_retries):
             try:
-                # Make API call (v1+ syntax)
-                response = self.client.chat.completions.create(
+                # Make API call (v0.28.1 syntax)
+                response = openai.ChatCompletion.create(
                     model=self.model,
                     messages=messages,
                     max_tokens=self.max_tokens,
                     temperature=self.temperature,
-                    timeout=30,  # 30 second timeout
+                    request_timeout=30,
                 )
 
-                # Extract response text (v1+ syntax)
+                # Extract response text (v0.28.1 syntax)
                 response_text = response.choices[0].message.content.strip()
 
                 # Validate response
